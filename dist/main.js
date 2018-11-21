@@ -97,23 +97,18 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return h; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "app", function() { return app; });
+// 通过h函数转化成node对象树
 function h(name, attributes) {
-  console.log('--------------------------');
-  console.log('name', name);
   var rest = [];
   var children = [];
   var length = arguments.length;
-  console.log('arguments', arguments);
 
   while (length-- > 2) {
     rest.push(arguments[length]);
   }
 
-  console.log('rest', rest);
-
   while (rest.length) {
-    var node = rest.pop();
-    console.log('node', node, node.pop);
+    var node = rest.pop(); // 考虑 {}中运行函数的情况，如map
 
     if (node && node.pop) {
       for (length = node.length; length--;) {
@@ -133,8 +128,10 @@ function h(name, attributes) {
 }
 function app(state, actions, view, container) {
   var map = [].map;
-  var rootElement = container && container.children[0] || null;
+  var rootElement = container && container.children[0] || null; // 如果原先有dom节点则转化成oldNode
+
   var oldNode = rootElement && recycleElement(rootElement);
+  console.log(oldNode);
   var lifecycle = [];
   var skipRender;
   var isRecycling = true;
@@ -499,10 +496,12 @@ var view = function view(state, actions) {
     onclick: function onclick() {
       return actions.up(1);
     }
-  }, " + "));
+  }, " + "), state.names.map(function (item) {
+    return Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("div", null, item);
+  }));
 };
 
-Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["app"])(state, actions, view, document.body);
+Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["app"])(state, actions, view, document.querySelector('#app'));
 
 /***/ })
 

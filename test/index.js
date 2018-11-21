@@ -17,6 +17,11 @@ const view = (state, actions) => (
         <h1>{state.count}</h1>
         <button onClick={() => actions.down(1)}> -</button>
         <button onClick={() => actions.up(1)}> +</button>
+        {
+            state.names.map(item =>
+                <div>{ item }</div>
+            )
+        }
     </div>
 );
 

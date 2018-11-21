@@ -1,19 +1,15 @@
+// 通过h函数转化成node对象树
 export function h(name, attributes) {
-    console.log('--------------------------');
-    console.log('name', name);
+
     var rest = []
     var children = []
     var length = arguments.length
 
-    console.log('arguments', arguments);
-
     while (length-- > 2) rest.push(arguments[length])
-
-    console.log('rest', rest);
 
     while (rest.length) {
         var node = rest.pop()
-        console.log('node', node, node.pop);
+        // 考虑 {}中运行函数的情况，如map
         if (node && node.pop) {
             for (length = node.length; length--; ) {
                 rest.push(node[length])
@@ -22,7 +18,6 @@ export function h(name, attributes) {
             children.push(node)
         }
     }
-
 
     return typeof name === "function"
         ? name(attributes || {}, children)
@@ -37,7 +32,12 @@ export function h(name, attributes) {
 export function app(state, actions, view, container) {
     var map = [].map
     var rootElement = (container && container.children[0]) || null
-    var oldNode = rootElement && recycleElement(rootElement)
+
+    // 如果原先有dom节点则转化成oldNode
+    var oldNode = rootElement && recycleElement(rootElement);
+
+    console.log(oldNode);
+
     var lifecycle = []
     var skipRender
     var isRecycling = true

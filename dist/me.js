@@ -10,7 +10,7 @@ var hyper = (function (exports) {
       onClick: () => actions.down(1)
     }, " -"), h("button", {
       onClick: () => actions.up(1)
-    }, " +"));
+    }, " +"), state.names.map(item => h("div", null, item)));
 
     function h(name, attributes) {
       console.log('name', name);
