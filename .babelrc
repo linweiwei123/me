@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    ["@babel/plugin-transform-react-jsx", {
+      "pragma": "h",
+      "pragmaFrag": "DomFrag", // default is React.Fragment
+      "throwIfNamespace": false // defaults to true
+    }]
+  ]
+}
