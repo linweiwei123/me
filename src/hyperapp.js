@@ -36,11 +36,11 @@ export function app(state, actions, view, container) {
     // 如果原先有dom节点则转化成oldNode
     var oldNode = rootElement && recycleElement(rootElement);
 
-    console.log(oldNode);
-
     var lifecycle = []
     var skipRender
     var isRecycling = true
+
+    // 浅拷贝，后面改进为深拷贝更佳
     var globalState = clone(state)
     var wiredActions = wireStateToActions([], globalState, clone(actions))
 
@@ -61,6 +61,7 @@ export function app(state, actions, view, container) {
     }
 
     function resolveNode(node) {
+
         return typeof node === "function"
             ? resolveNode(node(globalState, wiredActions))
             : node != null
@@ -71,7 +72,7 @@ export function app(state, actions, view, container) {
     function render() {
         skipRender = !skipRender
 
-        var node = resolveNode(view)
+        var node = resolveNode(view);
 
         if (container && !skipRender) {
             rootElement = patch(container, rootElement, oldNode, (oldNode = node))
@@ -120,12 +121,16 @@ export function app(state, actions, view, container) {
 
     function wireStateToActions(path, state, actions) {
         for (var key in actions) {
-            typeof actions[key] === "function"
-                ? (function(key, action) {
+
+            if(typeof actions[key] === "function"){
+                (function(key, action) {
+
+
                     actions[key] = function(data) {
                         var result = action(data)
 
                         if (typeof result === "function") {
+                            // 如果是函数，运行获取值
                             result = result(getPartialState(path, globalState), actions)
                         }
 
@@ -134,23 +139,29 @@ export function app(state, actions, view, container) {
                             result !== (state = getPartialState(path, globalState)) &&
                             !result.then // !isPromise
                         ) {
-                            scheduleRender(
-                                (globalState = setPartialState(
-                                    path,
-                                    clone(state, result),
-                                    globalState
-                                ))
-                            )
+                            console.log('=========================');
+                            console.log(path, state, result, globalState);
+                            console.log((globalState = setPartialState(
+                                path,
+                                clone(state, result),
+                                globalState
+                            )))
+                            console.log('=========================');
+                            scheduleRender();
                         }
 
                         return result
                     }
                 })(key, actions[key])
-                : wireStateToActions(
-                path.concat(key),
-                (state[key] = clone(state[key])),
-                (actions[key] = clone(actions[key]))
+
+            }
+            else {
+                wireStateToActions(
+                    path.concat(key),
+                    (state[key] = clone(state[key])),
+                    (actions[key] = clone(actions[key]))
                 )
+            }
         }
 
         return actions
@@ -309,8 +320,11 @@ export function app(state, actions, view, container) {
     }
 
     function patch(parent, element, oldNode, node, isSvg) {
+        // 同一个node树，什么也不处理
         if (node === oldNode) {
-        } else if (oldNode == null || oldNode.nodeName !== node.nodeName) {
+        }
+        // 第一次patch，直接创建DOM树
+        else if (oldNode == null || oldNode.nodeName !== node.nodeName) {
             var newElement = createElement(node, isSvg)
             parent.insertBefore(newElement, element)
 
@@ -319,9 +333,13 @@ export function app(state, actions, view, container) {
             }
 
             element = newElement
-        } else if (oldNode.nodeName == null) {
+        }
+        // 只有文字
+        else if (oldNode.nodeName == null) {
             element.nodeValue = node
-        } else {
+        }
+        // 新旧DOM树有所不同，进行diff修改更新DOM
+        else {
             updateElement(
                 element,
                 oldNode.attributes,
@@ -351,6 +369,7 @@ export function app(state, actions, view, container) {
                 var oldKey = getKey(oldChildren[i])
                 var newKey = getKey((children[k] = resolveNode(children[k])))
 
+                // 新node树中还存在的旧节点保留
                 if (newKeyed[oldKey]) {
                     i++
                     continue
