@@ -2,9 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>$Title$</title>
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 <body>
-$END$
+
+    <div id="app">
+        <div>
+            <h1>{{count}}</h1>
+            <button @click="down"> - </button>
+            <button @click="up"> + </button>
+        </div>
+
+        <div v-for="item in names"> {{ item }}</div>
+
+    </div>
+
+    <script type="text/javascript">
+
+        const getData = ()=>{
+            let data = [];
+            for(var i=0;i<10000;i++){
+                data.push('text_' + i)
+            }
+            return data
+        }
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                count: 5,
+                names: getData()
+            },
+            methods: {
+                down(){
+                    this.count--
+                },
+                up(){
+                    this.count++
+                }
+            }
+        })
+
+    </script>
+
 </body>
 </html>

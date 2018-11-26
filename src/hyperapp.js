@@ -320,6 +320,9 @@ export function app(state, actions, view, container) {
     }
 
     function patch(parent, element, oldNode, node, isSvg) {
+
+        console.log('patch');
+
         // 同一个node树，什么也不处理
         if (node === oldNode) {
         }

@@ -370,7 +370,8 @@ function app(state, actions, view, container) {
   }
 
   function patch(parent, element, oldNode, node, isSvg) {
-    // 同一个node树，什么也不处理
+    console.log('patch'); // 同一个node树，什么也不处理
+
     if (node === oldNode) {} // 第一次patch，直接创建DOM树
     else if (oldNode == null || oldNode.nodeName !== node.nodeName) {
         var newElement = createElement(node, isSvg);
@@ -479,10 +480,21 @@ function app(state, actions, view, container) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _hyperapp__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./hyperapp */ "./src/hyperapp.js");
 
+
+var getData = function getData() {
+  var data = [];
+
+  for (var i = 0; i < 3000; i++) {
+    data.push('text_' + i);
+  }
+
+  return data;
+};
+
 var state = {
   count: 5,
   times: 1,
-  names: ['美柚', '柚宝宝', '返还购'] // 没做data-binding
+  names: getData() // 没做data-binding
   // setInterval(() => {
   //     state.times++;
   // },1000)
@@ -507,23 +519,43 @@ var actions = {
     return function (state) {
       return state.names.push(value);
     };
+  },
+  remove: function remove(value) {
+    return function (state) {
+      return state.names.pop();
+    };
+  },
+  nothing: function nothing(value) {
+    return function (state) {
+      return {
+        count: state.count
+      };
+    };
   }
 };
 
 var view = function view(state, actions) {
-  return Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("div", null, Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("h1", null, state.count), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("h2", null, state.times), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("button", {
+  return Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("div", null, Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("div", null, Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("h1", null, state.count), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("h2", null, state.times), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("button", {
     onclick: function onclick() {
       return actions.down(1);
     }
-  }, " - "), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("button", {
+  }, " -"), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("button", {
     onclick: function onclick() {
       return actions.up(1);
     }
-  }, " + "), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("button", {
+  }, " +")), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("button", {
     onclick: function onclick() {
       return actions.add('新增');
     }
-  }, " add "), state.names.map(function (item) {
+  }, " add "), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("button", {
+    onclick: function onclick() {
+      return actions.remove();
+    }
+  }, " remove "), Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("button", {
+    onclick: function onclick() {
+      return actions.nothing();
+    }
+  }, " nothing "), state.names.map(function (item) {
     return Object(_hyperapp__WEBPACK_IMPORTED_MODULE_0__["h"])("div", null, item);
   }));
 };

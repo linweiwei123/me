@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "node watch.js",
-    "build": "rollup --config"
+    "build": "rollup --config",
+    "build:db": "rollup --config ./modules/rollup.config.js"
   },
   "keywords": [],
   "author": "",
