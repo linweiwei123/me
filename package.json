@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "node watch.js",
     "build": "rollup --config",
-    "build:db": "rollup --config ./modules/rollup.config.js"
+    "build:db": "rollup --config ./modules/rollup.config.js",
+    "build:mue": "rollup --config ./mue/rollup.config.js",
+    "watch:mue": "node ./mue/watch.js"
   },
   "keywords": [],
   "author": "",
