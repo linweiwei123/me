@@ -2,9 +2,9 @@ const path =  require('path');
 const babel =  require('rollup-plugin-babel');
 
 export default {
-    input: path.join(__dirname, './data-binding.js'),
+    input: path.join(__dirname, './test/parser-html.js'),
     output: {
-        file: 'dist/db.js',
+        file: 'dist/parse-demo.js',
         name: 'me',
         format: 'iife'
     },
