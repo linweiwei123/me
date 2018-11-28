@@ -1,5 +1,7 @@
 import parse from '../parser/index';
-import {isType} from "../utils/index";
+import {isType, deepCopy} from "../utils/index";
+import {patchInit} from './patch';
+import {watchData} from "./watch";
 
 /**
  * {
@@ -19,25 +21,38 @@ export default function Mue(options){
     this._init(options);
 }
 
+watchData(Mue);
+patchInit(Mue);
+
+
 Mue.prototype._init = function(options){
-    const { el, template, data, methods } = options;
+    const { el, template, data, mounted, methods } = options;
+    this.el = el;
     this.data = data;
 
     // template 解析成nodeObject（非vdom的那个nodeObject）
     const parsedNodes = parse(template);
 
-    // console.log(parsedNodes);
+    console.log('parsedNodes',parsedNodes);
 
-    let renderStr = 'return ' + buildRenderStr(parsedNodes);
-    //console.log(renderStr);
+    // 解析生成的nodeObject生成函数字符串
+    let compileStr = 'return ' + buildRenderStr(parsedNodes);
 
-    this.render = buildRender(renderStr);
+    // 用函数字符串生成render函数
+    this.compiler = buildCompiler(compileStr);
 
-    let vNodes = this.render();
-    console.log('vNodes', vNodes);
+    console.log('compiler fn',this.compiler);
+
+    // 用compiler生成VDOM，并调用patch方法生成DOM
+    this.render();
+
+    // 挂载执行的回调函数
+    mounted.call(this);
+
+    // 监听data变化
+    this.defineReactive();
 
 };
-
 
 function buildRenderStr(node){
     let tempStr = '';
@@ -49,12 +64,7 @@ function buildRenderStr(node){
             tempStr = `this._h('${node.tag}',${JSON.stringify(node.attrsMap)})`;
         }
 
-        // 有一个子元素
-        else if(node.children.length === 1){
-            tempStr = `this._h('${node.tag}',${JSON.stringify(node.attrsMap)},${buildRenderStr(node.children[0])})`;
-        }
-
-        // 有多个子元素
+        // 有子元素
         else {
             let children = node.children;
             let h_childs = [];
@@ -72,8 +82,33 @@ function buildRenderStr(node){
     return tempStr;
 }
 
-function buildRender(str) {
+function buildCompiler(str) {
     return new Function(str)
+}
+
+
+function recycleElement(element) {
+    return {
+        nodeName: element.nodeName.toLowerCase(),
+        attributes: {},
+        children: Array.prototype.map.call(element.childNodes, function(element) {
+            return element.nodeType === 3 // Node.TEXT_NODE
+                ? element.nodeValue
+                : recycleElement(element)
+        })
+    }
+}
+
+Mue.prototype.render = function(){
+    // render函数生成VDOM
+    let vNodes = this.compiler();
+
+    // VDOM 生成real DOM
+    let container = document.querySelector(this.el);
+    let rootElement = (container && container.children[0]) || null;
+    let oldNode = rootElement && recycleElement(rootElement);
+    console.log('render oldNode', oldNode, vNodes);
+    this.patch(container, rootElement, oldNode, (oldNode = vNodes));
 }
 
 Mue.prototype._h = function(nodeName, attributes, children) {
@@ -91,10 +126,17 @@ Mue.prototype._h = function(nodeName, attributes, children) {
         }
     }
 
-    // 只考虑m-if 的情况
+    // 只考虑m-if、m-for 的情况
     directives.forEach(item => {
-        let propValue = new Function(`return this.data.${item.prop}`).call(this);
-        isNeed = item.key === 'm-if'? (propValue ===  true ? true : false) : false;
+        if(item.key === 'm-if'){
+            let propValue = new Function(`return this.data.${item.prop}`).call(this);
+            isNeed = propValue ===  true ? true : false;
+        }
+        else if(item.key === 'm-model'){
+            let propValue = new Function(`return this.data.${item.prop}`).call(this);
+            node.value = propValue;
+        }
+
     });
 
     // 如果
@@ -109,16 +151,16 @@ Mue.prototype._h = function(nodeName, attributes, children) {
         return undefined;
     }
 
-    node = {
+    node = deepCopy({
         nodeName: nodeName,
         attributes: attributes || {},
         children: children,
         key: attributes && attributes.key
-    };
+    }, node);
+    console.log(node);
     return node;
 }
 
 Mue.prototype._s = function(expression){
-    console.log(expression);
     return expression;
 }

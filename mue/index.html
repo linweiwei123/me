@@ -3,8 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style type="text/css">
+
+        @keyframes scaling {
+            0%{
+                transform: scale(1.2);
+            }
+            50% {
+                transform: scale(0.8);
+            }
+            100%{
+                transform: scale(1.2);
+            }
+        }
+
+        loading{
+            position: absolute;
+            top: 20px;
+            height: 70px;
+            width: 70px;
+            background-color: rgba(99,99,99,0.1);
+            border-radius: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: scaling 1s linear infinite;
+        }
+
+
+        p{
+            line-height: 30px;
+            font-size: 30px;
+            color: #00B7FF;
+        }
+
+    </style>
 </head>
 <body>
+
+    <div id="app"></div>
 
 <script src="../dist/mue.js"></script>
 </body>
