@@ -2,6 +2,8 @@ import parse from '../parser/index';
 import {isType, deepCopy} from "../utils/index";
 import {patchInit} from './patch';
 import {watchData} from "./watch";
+import { stringify } from '../../modules/libs/stringify'
+
 
 /**
  * {
@@ -33,7 +35,7 @@ Mue.prototype._init = function(options){
     // template 解析成nodeObject（非vdom的那个nodeObject）
     const parsedNodes = parse(template);
 
-    console.log('parsedNodes',parsedNodes);
+    console.log('parsedNodes',stringify(parsedNodes));
 
     // 解析生成的nodeObject生成函数字符串
     let compileStr = 'return ' + buildRenderStr(parsedNodes);
@@ -107,7 +109,7 @@ Mue.prototype.render = function(){
     let container = document.querySelector(this.el);
     let rootElement = (container && container.children[0]) || null;
     let oldNode = rootElement && recycleElement(rootElement);
-    console.log('render oldNode', oldNode, vNodes);
+    console.log(JSON.stringify(vNodes));
     this.patch(container, rootElement, oldNode, (oldNode = vNodes));
 }
 
@@ -157,7 +159,6 @@ Mue.prototype._h = function(nodeName, attributes, children) {
         children: children,
         key: attributes && attributes.key
     }, node);
-    console.log(node);
     return node;
 }
 
